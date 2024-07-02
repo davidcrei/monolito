@@ -13,16 +13,17 @@ import * as CheckStockUseCase from "../../../modules/product-adm/usecase/check-s
 import * as CheckoutRepository from "../../../modules/checkout/repository/checkout.repository";
 import { ClientModel } from "../../client-adm/repository/client.model";
 import { InvoiceModel } from "../../invoice/repository/invoice.model";
-
+import GenerateInvoiceUseCase from "../../invoice/usecase/generate/generate.usecase";
+import {InvoiceItemModel} from "../../invoice/repository/item.model";
 
 describe("E2E test for checkout", () => {
   let sequelize: Sequelize;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     sequelize = new Sequelize({
       dialect: "sqlite",
       storage: ":memory:",
-      logging: false,
+      logging: console.log, // Habilitar logs
       sync: { force: true },
     });
 
@@ -33,16 +34,28 @@ describe("E2E test for checkout", () => {
       OrderClientModel,
       TransactionModel,
       StoreProductModel,
-      StoreProductModel,
-      InvoiceModel      
+      InvoiceModel,
+      InvoiceItemModel      
     ]);
 
     await sequelize.sync({ force: true });
   });
 
   afterAll(async () => {
-    await sequelize.close();
+    //await sequelize.close();
   });
+
+  beforeEach(async () => {
+    await sequelize.addModels([ProductModel,
+      OrderModel,
+      ClientModel,
+      OrderClientModel,
+      TransactionModel,
+      StoreProductModel,
+      InvoiceModel,
+      InvoiceItemModel]);
+    await sequelize.sync({ force: true });
+    });
 
   it("should create a placeorder", async () => {
     const invoiceId = new Id()
@@ -55,10 +68,7 @@ describe("E2E test for checkout", () => {
         })
       ),
     }))
-    //jest.spyOn(GenerateInvoiceUseCase, 'default').mockImplementation(() => ({
-      // @ts-ignore
-  //    execute: jest.fn((invoice) => Promise.resolve({ id: invoiceId })),
-   // }))
+    
 
     jest.spyOn(CheckoutRepository, 'default').mockImplementation(() => ({
       // @ts-ignore
@@ -110,5 +120,7 @@ describe("E2E test for checkout", () => {
     expect(response.body.total).toBe(100)
     expect(response.body.products.length).toBe(1)
     expect(response.body.products[0].productId).toBe("1")
+    
   });
+
 });
