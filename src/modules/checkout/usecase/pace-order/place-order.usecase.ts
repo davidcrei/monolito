@@ -6,9 +6,10 @@ import PaymentFacadeInterface from "../../../payment/facade/facade.interface";
 import ProductAdmFacadeInterface from "../../../product-adm/facade/product-adm.facade.interface";
 import StoreCatalogFacadeInterface from "../../../store-catalog/facade/store-catalog.facade.interface";
 import Client from "../../domain/client.entity";
-import Order from "../../domain/order.entity";
+import { Order } from "../../domain/order.entity";
 import Product from "../../domain/product.entity";
-import CheckoutGateway from "../../gateway/checkout.gateway";
+import { CheckoutGateway } from "../../gateway/checkout.gateway";
+
 import { PlaceOrderInputDto, PlaceOrderOutputDto } from "./place-order.dto";
 
 export default class PlaceOrderUseCase implements UseCaseInterface {
@@ -50,13 +51,19 @@ export default class PlaceOrderUseCase implements UseCaseInterface {
       id: new Id(client.id),
       name: client.name,
       email: client.email,
-      address: client.street,
+      document: client.document,
+      street: client.street,
+      number: client.number,
+      complement: client.complement,
+      city: client.city,
+      state: client.state,
+      zipCode: client.zipCode,
     });
 
     const order = new Order({
       client: myClient,
       products,
-    });
+    })
 
     const payment = await this._paymentFacade.process({
       orderId: order.id.id,
